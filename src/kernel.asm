@@ -18,6 +18,19 @@ _start:
   or al, 2
   out 0x92, al
 
+  ; Remap the master PIC
+  ; this is done because IRQ's 0-7 confilct with CPU exceptions
+  ; 0x20 is the beginning of available range
+  mov al, 00010001b
+  out 0x20, al
+  mov al, 0x20
+  out 0x21, al
+  mov al, 00000001b
+  out 0x21, al
+
+  ;Enable Interrupts
+  sti
+
   call kernel_main
 
   jmp $
