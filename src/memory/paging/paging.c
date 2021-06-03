@@ -73,7 +73,7 @@ int paging_set(uint32_t *directory, void *virt, uint32_t val)
 
   uint32_t directory_index = 0;
   uint32_t table_index = 0;
-  int res = paging_get_indexes(virt, directory_index, table_index);
+  int res = paging_get_indexes(virt, &directory_index, &table_index);
   if (res < 0)
   {
     return res;
@@ -81,6 +81,8 @@ int paging_set(uint32_t *directory, void *virt, uint32_t val)
 
   uint32_t entry = directory[directory_index];
   // extract only the physical address of the table on the heap
-  uint32_t *table = (uint32_t)(entry & 0xfffff000);
+  uint32_t *table = (uint32_t *)(entry & 0xfffff000);
   table[table_index] = val;
+
+  return 0;
 }
