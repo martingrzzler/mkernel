@@ -6,6 +6,7 @@ int strlen(const char *ptr)
   while (*ptr != 0)
   {
     len++;
+    ptr += 1;
   }
   return len;
 }

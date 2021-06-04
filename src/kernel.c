@@ -6,6 +6,9 @@
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
 #include "disk/disk.h"
+#include "disk/streamer.h"
+#include "fs/pparser.h"
+#include "string/string.h"
 
 uint16_t *video_mem = 0;
 uint16_t terminal_row = 0;
@@ -54,16 +57,6 @@ void terminal_initialize()
   }
 }
 
-size_t strlen(const char *str)
-{
-  size_t len = 0;
-  while (str[len])
-  {
-    len++;
-  }
-  return len;
-}
-
 void print(const char *str)
 {
   size_t len = strlen(str);
@@ -98,4 +91,7 @@ void kernel_main()
 
   // enable system interrupts
   enable_interrupts();
+
+  char buf[512];
+  disk_read_sector(0, 1, buf);
 }
