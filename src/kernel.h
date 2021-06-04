@@ -6,6 +6,8 @@
 
 #define TERMINAL_WHITE 15
 
+#define MAX_PATH 108
+
 void kernel_main();
 void print(const char *str);
 
