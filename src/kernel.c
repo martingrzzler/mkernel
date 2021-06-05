@@ -91,7 +91,4 @@ void kernel_main()
 
   // enable system interrupts
   enable_interrupts();
-
-  char buf[512];
-  disk_read_sector(0, 1, buf);
 }

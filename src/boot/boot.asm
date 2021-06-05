@@ -78,20 +78,20 @@ ata_lba_read:
 
   ;send all sectors to read
   mov eax, ecx
-  mov dx, 0xf2
+  mov dx, 0x1f2
   out dx, al
 
   ;send more bits of lba
   mov eax, ebx
-  mov dx, 0xf3
+  mov dx, 0x1f3
   out dx, al
 
-  mov dx, 0xf4
+  mov dx, 0x1f4
   mov eax, ebx
   shr eax, 8
   out dx, al
 
-  mov dx, 0xf5
+  mov dx, 0x1f5
   mov eax, ebx
   shr eax, 16
   out dx, al
