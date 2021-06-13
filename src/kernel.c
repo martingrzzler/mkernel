@@ -9,6 +9,7 @@
 #include "disk/streamer.h"
 #include "fs/pparser.h"
 #include "string/string.h"
+#include "fs/file.h"
 
 uint16_t *video_mem = 0;
 uint16_t terminal_row = 0;
@@ -74,6 +75,9 @@ void kernel_main()
   // initialize heap
   kheap_init();
 
+  // Intitalize filesystems
+  fs_init();
+
   // search and intialize disks
   disk_search_and_init();
 
@@ -91,4 +95,10 @@ void kernel_main()
 
   // enable system interrupts
   enable_interrupts();
+
+  char buf[20];
+  strcpy(buf, "Hi There!");
+  while (1)
+  {
+  }
 }
