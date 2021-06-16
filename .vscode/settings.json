@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"cstdint": "cpp",
-		"cstdbool": "c"
+		"cstdbool": "c",
+		"kernel.h": "c"
 	}
 }
