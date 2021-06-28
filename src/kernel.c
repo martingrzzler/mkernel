@@ -12,9 +12,11 @@
 #include "string/string.h"
 #include "task/tss.h"
 #include "fs/file.h"
+#include "task/task.h"
+#include "task/process.h"
 #include "gdt/gdt.h"
+#include "status.h"
 #include "config.h"
-
 uint16_t *video_mem = 0;
 uint16_t terminal_row = 0;
 uint16_t terminal_col = 0;
@@ -131,18 +133,13 @@ void kernel_main()
   // enable paging
   enable_paging();
 
-  // enable system interrupts
-  enable_interrupts();
-
-  int fd = fopen("0:/hello.txt", "r");
-  if (fd)
+  struct process *process = 0;
+  int res = process_load("0:/blank.bin", &process);
+  if (res != ALL_OK)
   {
-    struct file_stat s;
-    fstat(fd, &s);
-    fclose(fd);
-
-    print("testing\n");
+    panic("Failed to load blank.bin\n");
   }
+  task_run_first_ever_task();
 
   while (1)
   {
