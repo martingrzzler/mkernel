@@ -1,6 +1,7 @@
 #include "gdt.h"
 #include "kernel.h"
 
+// for a refresher https://wiki.osdev.org/Global_Descriptor_Table
 void encodeGdtEntry(uint8_t *target, struct gdt_structured source)
 {
 	// maximum size of the GDT is 65536 -> 8192 entries
