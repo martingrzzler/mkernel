@@ -18,6 +18,7 @@
 #include "gdt/gdt.h"
 #include "status.h"
 #include "config.h"
+#include "keyboard/keyboard.h"
 uint16_t *video_mem = 0;
 uint16_t terminal_row = 0;
 uint16_t terminal_col = 0;
@@ -140,6 +141,9 @@ void kernel_main()
 
   // register the kernel commands
   isr80h_register_commands();
+
+  // init all keyboard
+  keyboard_init();
 
   struct process *process = 0;
   int res = process_load("0:/blank.bin", &process);
