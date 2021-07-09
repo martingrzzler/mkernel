@@ -16,5 +16,6 @@ void keyboard_init();
 int keyboard_insert(struct keyboard *keyboard);
 void keyboard_backspace(struct process *process);
 void keyboard_push(char c);
+char keyboard_pop();
 
 #endif

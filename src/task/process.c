@@ -22,6 +22,13 @@ struct process *process_current()
 	return current_process;
 }
 
+int process_switch(struct process *process)
+{
+	// usually you save state of video memory or something but in our case all processes are printing to the same video memory
+	current_process = process;
+	return 0;
+}
+
 struct process *process_get(int process_id)
 {
 	if (process_id < 0 || process_id >= MAX_PROCESSES)
@@ -92,7 +99,7 @@ int process_map_memory(struct process *process)
 		goto out;
 	}
 
-	paging_map_to(process->task->page_directory, (void*)PROGRAM_VIRTUAL_STACK_ADDRESS_END, process->stack, paging_align_address(process->stack + USER_PROGRAM_STACK_SIZE), PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL | PAGING_IS_WRITEABLE);
+	paging_map_to(process->task->page_directory, (void *)PROGRAM_VIRTUAL_STACK_ADDRESS_END, process->stack, paging_align_address(process->stack + USER_PROGRAM_STACK_SIZE), PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL | PAGING_IS_WRITEABLE);
 out:
 	return res;
 }
@@ -120,6 +127,16 @@ int process_load(const char *filename, struct process **process)
 	}
 	res = process_load_for_slot(filename, process, process_slot);
 out:
+	return res;
+}
+
+int process_load_switch(const char* filename, struct process** process)
+{
+	int res = process_load(filename, process);
+	if (res == 0)
+	{
+		process_switch(*process);
+	}
 	return res;
 }
 

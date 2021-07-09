@@ -34,12 +34,36 @@ void terminal_putchar(int x, int y, char c, int color)
   video_mem[(y * VGA_WIDTH) + x] = terminal_make_char(c, color);
 }
 
+void terminal_backspace()
+{
+  if (terminal_row == 0 && terminal_col == 0)
+  {
+    return;
+  }
+
+  if (terminal_col == 0)
+  {
+    terminal_row -= 1;
+    terminal_col = VGA_WIDTH;
+  }
+
+  terminal_col -= 1;
+  terminal_writechar(' ', TERMINAL_WHITE);
+  terminal_col -= 1;
+}
+
 void terminal_writechar(char c, char color)
 {
   if (c == '\n')
   {
     terminal_row += 1;
     terminal_col = 0;
+    return;
+  }
+
+  if (c == 0x08)
+  {
+    terminal_backspace();
     return;
   }
 
@@ -146,11 +170,12 @@ void kernel_main()
   keyboard_init();
 
   struct process *process = 0;
-  int res = process_load("0:/blank.bin", &process);
+  int res = process_load_switch("0:/blank.bin", &process);
   if (res != ALL_OK)
   {
     panic("Failed to load blank.bin\n");
   }
+
   task_run_first_ever_task();
 
   while (1)
