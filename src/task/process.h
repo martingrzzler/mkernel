@@ -11,6 +11,24 @@
 
 typedef unsigned char PROCESS_FILETYPE;
 
+struct process_allocation
+{
+	void *ptr;
+	size_t size;
+};
+
+struct command_argument
+{
+	char argument[512];
+	struct command_argument *next;
+};
+
+struct process_arguments
+{
+	int argc;
+	char **argv;
+};
+
 struct process
 {
 	// Process id
@@ -19,13 +37,13 @@ struct process
 	// main process task
 	struct task *task;
 	// memory (malloc) alocations of the process
-	void *allocations[MAX_PROGRAM_ALLOCATIONS];
+	struct process_allocation allocations[MAX_PROGRAM_ALLOCATIONS];
 
 	PROCESS_FILETYPE filetype;
 
 	union
 	{
-		// physical pointer to the process memory
+		// physican pointer to the process memory
 		void *ptr;
 		struct elf_file *elf_file;
 	};
@@ -41,8 +59,12 @@ struct process
 		int tail;
 		int head;
 	} keyboard;
+
+	struct process_arguments arguments;
 };
 int process_load_switch(const char *filename, struct process **process);
+void process_get_arguments(struct process *process, int *argc, char ***argv);
+int process_inject_arguments(struct process *process, struct command_argument *root_argument);
 int process_switch(struct process *process);
 int process_load_for_slot(const char *filename, struct process **process, int process_slot);
 int process_load(const char *filename, struct process **process);

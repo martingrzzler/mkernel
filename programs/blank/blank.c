@@ -1,10 +1,13 @@
 #include "os.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include "string.h"
 
 int main(int argc, char **argv)
 {
-	printf("My age is %i\n", 98);
+	struct process_arguments arguments;
+	os_process_get_arguments(&arguments);
+	printf("%i %s\n", arguments.argc, arguments.argv[0]);
 
 	while (1)
 	{

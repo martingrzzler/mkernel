@@ -8,6 +8,7 @@ global os_malloc:function
 global os_free:function
 global os_putchar:function
 global os_process_load_start:function
+global os_process_get_arguments:function
 
 ; void print(const char* filename)
 print:
@@ -67,4 +68,17 @@ os_process_load_start:
 	add esp, 4
 	pop ebp
 	ret
+;  void os_process_get_arguments(struct process_arguments* arguments)
+os_process_get_arguments:
+	push ebp
+	mov ebp, esp
+	mov eax, 8 ; get args command
+	push dword[ebp+8]
+	int 0x80
+	add esp, 4
+	pop ebp
+	ret
+
+
+
 
