@@ -5,12 +5,11 @@
 
 int main(int argc, char **argv)
 {
-	struct process_arguments arguments;
-	os_process_get_arguments(&arguments);
-	printf("%i %s\n", arguments.argc, arguments.argv[0]);
-
-	while (1)
+	print("Hi there elf\n");
+	for (int i = 0; i < argc; i++)
 	{
+		printf("%s\n", argv[i]);
 	}
-	return 0;
+
+		return 0;
 }

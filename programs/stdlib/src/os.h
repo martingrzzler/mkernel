@@ -26,5 +26,8 @@ int os_getkeyblock();
 void os_terminal_readline(char *out, int max, bool output_while_typing);
 void os_process_load_start(const char *filename);
 void os_process_get_arguments(struct process_arguments *arguments);
+int os_system(struct command_argument *arguments);
+int os_system_run(const char *command);
+void os_exit();
 
 #endif

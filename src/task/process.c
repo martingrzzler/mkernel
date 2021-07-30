@@ -110,15 +110,108 @@ static struct process_allocation *process_get_allocation_by_addr(struct process 
 	return 0;
 }
 
+int process_terminate_allocations(struct process *process)
+{
+	for (int i = 0; i < MAX_PROGRAM_ALLOCATIONS; i++)
+	{
+		// you could just kfree the memory here for speed
+		process_free(process, process->allocations[i].ptr);
+	}
+
+	return 0;
+}
+
+int process_free_binary_data(struct process *process)
+{
+	kfree(process->ptr);
+	return 0;
+}
+
+int process_free_elf_data(struct process *process)
+{
+	elf_close(process->elf_file);
+
+	return 0;
+}
+
+int process_free_program_data(struct process *process)
+{
+	int res = 0;
+	switch (process->filetype)
+	{
+	case PROCESS_FILETYPE_BINARY:
+		res = process_free_binary_data(process);
+		break;
+
+	case PROCESS_FILETYPE_ELF:
+		res = process_free_elf_data(process);
+		break;
+
+	default:
+		res = -EINVARG;
+	}
+
+	return res;
+}
+
+void process_switch_to_any()
+{
+	for (int i = 0; i < MAX_PROCESSES; i++)
+	{
+		if (processes[i])
+		{
+			process_switch(processes[i]);
+			return;
+		}
+	}
+
+	panic("panicked: No processes to switch to");
+}
+
+static void process_unlink(struct process *process)
+{
+	processes[process->id] = 0x00;
+
+	if (current_process == process)
+	{
+		process_switch_to_any();
+	}
+}
+
+int process_terminate(struct process *process)
+{
+	int res = 0;
+	res = process_terminate_allocations(process);
+
+	if (res < 0)
+	{
+		goto out;
+	}
+
+	res = process_free_program_data(process);
+	if (res < 0)
+	{
+		goto out;
+	}
+
+	kfree(process->stack);
+	task_free(process->task);
+
+	process_unlink(process);
+
+out:
+	return res;
+}
+
 void process_get_arguments(struct process *process, int *argc, char ***argv)
 {
 	*argc = process->arguments.argc;
 	*argv = process->arguments.argv;
 }
 
-int process_count_command_arguments(struct command_argument* root_argument)
+int process_count_command_arguments(struct command_argument *root_argument)
 {
-	struct command_argument* current = root_argument;
+	struct command_argument *current = root_argument;
 	int i = 0;
 	while (current)
 	{
@@ -139,7 +232,7 @@ int process_inject_arguments(struct process *process, struct command_argument *r
 		res = -EIO;
 		goto out;
 	}
-	char **argv = process_malloc(process, sizeof(const char*) * argc);
+	char **argv = process_malloc(process, sizeof(const char *) * argc);
 	if (!argv)
 	{
 		res = -ENOMEM;
@@ -148,7 +241,7 @@ int process_inject_arguments(struct process *process, struct command_argument *r
 
 	while (current)
 	{
-		char* argument_str = process_malloc(process, sizeof(current->argument));
+		char *argument_str = process_malloc(process, sizeof(current->argument));
 		if (!argument_str)
 		{
 			res = -ENOMEM;
@@ -156,7 +249,7 @@ int process_inject_arguments(struct process *process, struct command_argument *r
 		}
 
 		strncpy(argument_str, current->argument, sizeof(current->argument));
-		argv[i]= argument_str;
+		argv[i] = argument_str;
 		current = current->next;
 		i++;
 	}
@@ -199,6 +292,7 @@ struct process *process_get(int process_id)
 
 static int process_load_binary(const char *filename, struct process *process)
 {
+	void *program_data_ptr = 0;
 	int res = 0;
 	int fd = fopen(filename, "r");
 	if (!fd)
@@ -213,7 +307,7 @@ static int process_load_binary(const char *filename, struct process *process)
 		goto out;
 	}
 
-	void *program_data_ptr = kzalloc(stat.filesize);
+	program_data_ptr = kzalloc(stat.filesize);
 	if (!program_data_ptr)
 	{
 		res = -ENOMEM;
@@ -231,6 +325,11 @@ static int process_load_binary(const char *filename, struct process *process)
 	process->size = stat.filesize;
 
 out:
+	if (res < 0)
+	{
+		if (program_data_ptr)
+			kfree(program_data_ptr);
+	}
 	fclose(fd);
 	return res;
 }
